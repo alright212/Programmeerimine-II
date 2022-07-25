@@ -1,1 +1,98 @@
-tere
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <ctype.h>
+#include <time.h>
+#include <stdbool.h>
+
+#define MAX_PRODUCT_NAME_LENGTH 20
+#define MAX_PRODUCT_COUNT 10
+#define MAX_PRODUCT_QUANTITY 100
+#define MAX_PRODUCT_PRICE 100
+#define MAX_SUM_OF_MONEY 1000
+
+typedef struct {
+    char name[MAX_PRODUCT_NAME_LENGTH];
+    int price;
+    int quantity;
+} Product;
+
+void readProductsFromFile(Product *products, int *productCount);
+void readSumOfMoney(int *sumOfMoney);
+void printProducts(Product *products, int productCount);
+void printSumOfMoney(int sumOfMoney);
+void printPossibleCombinations(Product *products, int productCount, int sumOfMoney);
+void printPossibleCombinationsRecursive(Product *products, int productCount, int sumOfMoney, int currentProductIndex, int currentSumOfMoney, int *currentCombination, int currentCombinationLength);
+void printCombination(int *combination, int combinationLength);
+
+int main() {
+    Product products[MAX_PRODUCT_COUNT];
+    int productCount = 0;
+    int sumOfMoney = 0;
+
+    readProductsFromFile(products, &productCount);
+    readSumOfMoney(&sumOfMoney);
+
+    printProducts(products, productCount);
+    printSumOfMoney(sumOfMoney);
+    printPossibleCombinations(products, productCount, sumOfMoney);
+
+    return 0;
+}
+
+void readProductsFromFile(Product *products, int *productCount) {
+    FILE *file = fopen("products.txt", "r");
+    if (file == NULL) {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    while (fscanf(file, "%s %d %d", products[*productCount].name, &products[*productCount].price, &products[*productCount].quantity) != EOF) {
+        (*productCount)++;
+    }
+
+    fclose(file);
+}
+
+void readSumOfMoney(int *sumOfMoney) {
+    printf("Sisestage rahasumma: ");
+    scanf("%d", sumOfMoney);
+}
+
+void printProducts(Product *products, int productCount) {
+    printf("Tooted:\n");
+    for (int i = 0; i < productCount; i++) {
+        printf("%s %d %d\n", products[i].name, products[i].price, products[i].quantity);
+    }
+}
+
+void printSumOfMoney(int sumOfMoney) {
+    printf("Rahasumma: %d\n", sumOfMoney);
+}
+
+void printPossibleCombinations(Product *products, int productCount, int sumOfMoney) {
+    int currentCombination[MAX_PRODUCT_COUNT];
+    printPossibleCombinationsRecursive(products, productCount, sumOfMoney, 0, 0, currentCombination, 0);
+}
+
+void printPossibleCombinationsRecursive(Product *products, int productCount, int sumOfMoney, int currentProductIndex, int currentSumOfMoney, int *currentCombination, int currentCombinationLength) {
+    if (currentProductIndex == productCount) {
+        if (currentSumOfMoney == sumOfMoney) {
+            printCombination(currentCombination, currentCombinationLength);
+        }
+        return;
+    }
+
+    for (int i = 0; i <= products[currentProductIndex].quantity; i++) {
+        currentCombination[currentCombinationLength] = i;
+        printPossibleCombinationsRecursive(products, productCount, sumOfMoney, currentProductIndex + 1, currentSumOfMoney + i * products[currentProductIndex].price, currentCombination, currentCombinationLength + 1);
+    }
+}
+
+void printCombination(int *combination, int combinationLength) {
+    for (int i = 0; i < combinationLength; i++) {
+        printf("%d ", combination[i]);
+    }
+    printf("\n");
+}
